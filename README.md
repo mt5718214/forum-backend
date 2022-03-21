@@ -2,17 +2,15 @@
 
 ## Initialize
 ```
-git clone https://github.com/ALPHACamp/forum-express.git
+git clone https://github.com/mt5718214/forum-backend.git
 cd forum-express
 npm install
 npx sequelize db:migrate
 npx sequelize db:seed:all
 npm run dev
-```
 
-### Heroku
-- https://forum-express-demo.herokuapp.com/
-- 可使用 root@example.com 登入，密碼 12345678
+可使用 root@example.com 登入，密碼 12345678
+```
 
 ## User stories
 
