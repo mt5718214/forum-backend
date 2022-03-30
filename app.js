@@ -1,14 +1,12 @@
 const express = require('express')
 const handlebars = require('express-handlebars')
-const db = require('./models')
 const bodyParser = require('body-parser')
 const methodOverride = require('method-override')
 const flash = require('connect-flash')
 const session = require('express-session')
 const cors = require('cors')
 const app = express()
-const server = require('http').createServer(app);
-const io = require('socket.io')(server);
+const http = require('http').createServer(app)
 const port = process.env.PORT || 3000
 if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config()
@@ -16,7 +14,18 @@ if (process.env.NODE_ENV !== 'production') {
 const passport = require('./config/passport')
 
 // cors 的預設為全開放
-app.use(cors())
+app.use(cors({
+  origin: ["http://localhost:8080", 'https://mt5718214.github.io'],
+  credentials: true
+}))
+
+const io = require('socket.io')(http, {
+  cors: {
+    methods: ['GET', 'POST'],
+    allowedHeaders: ['my-custom-header'],
+    credentials: true
+  }
+})
 
 // 設定 view engine 使用 handlebars
 app.engine('handlebars', handlebars({
@@ -42,9 +51,12 @@ app.use((req, res, next) => {
   next()
 })
 
-server.listen(port, () => {
+http.listen(port, () => {
   console.log(`Example app listening on port ${port}`)
 })
+
+// websocket
+require('./controllers/ws/chat')(io)
 
 const swaggerUi = require('swagger-ui-express')
 const swaggerDocument = require('./config/swagger.json')
