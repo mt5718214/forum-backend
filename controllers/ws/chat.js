@@ -21,7 +21,7 @@ module.exports = (io) => {
     // 使用者離開
     socket.on('leave', (userId) => {
       socket.broadcast.emit('leave', onlineUsers.get(userId))
-      if (!onlineUsers.has(userId)) {
+      if (onlineUsers.has(userId)) {
         onlineUsers.delete(userId)
       }
       console.log('disconnected~~~')
