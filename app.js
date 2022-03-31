@@ -21,6 +21,7 @@ app.use(cors({
 
 const io = require('socket.io')(http, {
   cors: {
+    origin: ['http://localhost:8080', 'https://mt5718214.github.io'],
     methods: ['GET', 'POST'],
     allowedHeaders: ['my-custom-header'],
     credentials: true
