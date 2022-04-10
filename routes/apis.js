@@ -11,8 +11,24 @@ const adminController = require('../controllers/api/adminController.js')
 const categoryController = require('../controllers/api/categoryController.js')
 const commentController = require('../controllers/api/commentController.js')
 
-const authenticated = passport.authenticate('jwt', { session: false })
-
+/**
+ * https://github.com/jaredhanson/passport/blob/master/lib/authenticator.js line 141 to line 144
+ * 可以把req, res, next傳入callback
+ */
+const authenticated = (req, res, next) => {
+  passport.authenticate('jwt', { session: false }, (err, user, info) => {
+    if (err) {
+      console.log(err)
+    }
+    if (!user) {
+      return res
+        .status(401)
+        .json({ status: 'error', message: 'No auth token' })
+    }
+    req.user = user
+    return next()
+  })(req, res, next)
+}
 const authenticatedAdmin = (req, res, next) => {
   if (req.user) {
     if (req.user.isAdmin) { return next() }
