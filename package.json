@@ -5,7 +5,10 @@
   "main": "app.js",
   "scripts": {
     "start": "node app.js",
-    "dev": "nodemon app.js",
+    "dev": "read -p '[Set NODE_ENV] 請輸入(docker, development, test...etc): ' env && NODE_ENV=$env nodemon app.js",
+    "models": "read -p '[Set NODE_ENV] 請輸入(docker, development, test...etc): ' env && NODE_ENV=$env sequelize db:migrate",
+    "seeders": "read -p '[Set NODE_ENV] 請輸入(docker, development, test...etc): ' env && NODE_ENV=$env sequelize db:seed:all",
+    "down": "read -p '[Set NODE_ENV] 請輸入(docker, development, test...etc): ' env && NODE_ENV=$env sequelize db:seed:undo:all",
     "test": "mocha --exit"
   },
   "author": "",
