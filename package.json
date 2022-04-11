@@ -43,13 +43,13 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ALPHACamp/forum-express.git"
+    "url": "git+https://github.com/mt5718214/forum-backend.git"
   },
   "keywords": [],
   "bugs": {
-    "url": "https://github.com/ALPHACamp/forum-express/issues"
+    "url": "https://github.com/mt5718214/forum-backend/issues"
   },
-  "homepage": "https://github.com/ALPHACamp/forum-express#readme",
+  "homepage": "https://github.com/mt5718214/forum-backend#readme",
   "devDependencies": {
     "chai": "^4.3.6",
     "mocha": "^9.2.2",
