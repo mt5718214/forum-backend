@@ -6,6 +6,8 @@ const sinon = require('sinon')
 
 const app = require('../app')
 const db = require('../models')
+const Category = db.Category
+const Restaurant = db.Restaurant
 const passport = require('../config/passport')
 
 describe('# user request', () => {
@@ -14,10 +16,7 @@ describe('# user request', () => {
 
     describe('GET /api/restaurants', () => {
       before(async () => {
-        await db.User.destroy({ where: {}, truncate: true })
-        await db.Restaurant.destroy({ where: {}, truncate: true })
-
-        const rootUser = await db.User.create({ name: 'root' })
+        const rootUser = { name: 'root' }
         /**
          * yields方法可以讓給定的method中的callback執行, 而不去執行method中的其他邏輯
          * 這個寫法也可以 this.authenticate = sinon.stub(passport, 'authenticate').returns(() => { }).yields(null, { id: 1 })
@@ -28,7 +27,10 @@ describe('# user request', () => {
           callback(null, { ...rootUser }, null)
           return (req, res, next) => { }
         })
-        await db.Restaurant.create({ name: 'Restaurant', createdAt: new Date(), updatedAt: new Date(), CategoryId: 1 })
+        this.Restaurant = sinon.stub(Restaurant, 'findAndCountAll').resolves({
+          rows: [{ dataValues: { name: 'Restaurant', createdAt: new Date(), updatedAt: new Date(), CategoryId: 1 } }]
+        })
+        this.Category = sinon.stub(Category, 'findAll').resolves([1, 2, 3, 4, 5, 6, 7])
       })
 
       it(' - successfully', (done) => {
@@ -38,6 +40,7 @@ describe('# user request', () => {
           .expect(200)
           .end((err, res) => {
             if (err) return done(err)
+            console.log(res.text)
             expect(res.text).to.include('Restaurant')
             return done()
           })
@@ -50,8 +53,8 @@ describe('# user request', () => {
          * 如果使用const或var會因為塊級區域導致after中找不到該變數, 或是可以把authenticate變數宣告在before之前
          **/
         this.authenticate.restore()
-        await db.Restaurant.destroy({ where: {}, truncate: true })
-        await db.User.destroy({ where: {}, truncate: true })
+        this.Restaurant.restore()
+        this.Category.restore()
       })
     })
 
