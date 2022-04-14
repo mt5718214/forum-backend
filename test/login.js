@@ -2,17 +2,21 @@ const chai = require('chai')
 const should = chai.should()
 const request = require('supertest')
 const bcrypt = require('bcryptjs')
+const sinon = require('sinon')
 
 const app = require('../app')
 const db = require('../models')
+const User = db.User
 
 describe('# login request', () => {
   before(async () => {
-    await db.User.create({
+    const user = {
       name: 'test1',
       email: 'test1',
       password: bcrypt.hashSync('test1', bcrypt.genSaltSync(10)),
-    })
+    }
+    this.create = sinon.stub(User, 'create').returns(user)
+    this.findOne = sinon.stub(User, 'findOne').resolves({ ...user })
   })
 
   it('login fail', (done) => {
@@ -21,7 +25,8 @@ describe('# login request', () => {
       .send('')
       .end((err, res) => {
         if (err) return done(err)
-        console.log('res', res.body.token)
+        const status = res.body.status
+        status.should.equal('error')
         return done()
       })
   })
@@ -44,6 +49,7 @@ describe('# login request', () => {
   })
 
   after(async () => {
-    await db.User.destroy({ where: { name: 'test1' } })
+    this.create.restore()
+    this.findOne.restore()
   })
 })

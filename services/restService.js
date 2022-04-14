@@ -30,9 +30,9 @@ const restService = {
       // clean up restaurant data
       const data = result.rows.map(r => ({
         ...r.dataValues,
-        description: r.dataValues.description.substring(0, 50),
-        isFavorited: req.user.FavoritedRestaurants.map(d => d.id).includes(r.id),
-        isLiked: req.user.LikedRestaurants.map(d => d.id).includes(r.id)
+        description: r.dataValues.description ? r.dataValues.description.substring(0, 50) : '',
+        isFavorited: req.user.FavoritedRestaurants ? req.user.FavoritedRestaurants.map(d => d.id).includes(r.id) : false,
+        isLiked: req.user.LikedRestaurants ? req.user.LikedRestaurants.map(d => d.id).includes(r.id) : false
       }))
       Category.findAll().then(categories => {
         return callback({
