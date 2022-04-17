@@ -14,7 +14,7 @@ const setData = async (key, value) => {
   client.on('error', (err) => console.log('Redis Client Error', err))
 
   await client.connect()
-  await client.set(key, value)
+  await client.set(key, JSON.stringify(value))
   await client.quit()
   return true
 }
@@ -34,7 +34,7 @@ const getData = async (key) => {
   await client.connect()
   const value = await client.get(key)
   await client.quit()
-  return value
+  return JSON.parse(value)
 }
 
 /**
