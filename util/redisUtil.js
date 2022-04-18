@@ -1,5 +1,7 @@
 const { createClient } = require('redis');
 
+const REDIS_URL = process.env.REDIS_URL || 'redis://localhost:6379'
+
 /**
  * 寫入
  * @param {string} key 
@@ -8,7 +10,7 @@ const { createClient } = require('redis');
  */
 const setData = async (key, value) => {
   const client = createClient({
-    url: 'redis://localhost:6379'
+    url: REDIS_URL
   })
 
   client.on('error', (err) => console.log('Redis Client Error', err))

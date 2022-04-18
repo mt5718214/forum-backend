@@ -1,4 +1,4 @@
-const { getData, setData } = require('../util/redisUtil')
+const redisUtil = require('../util/redisUtil')
 const { ERedisKey } = require('../enumModel')
 
 const db = require('../models')
@@ -24,7 +24,7 @@ const restService = {
     }
 
     // get redis data
-    const data = await getData(`${ERedisKey.AllRestaurants}:${page}`)
+    const data = await redisUtil.getData(`${ERedisKey.AllRestaurants}:${page}`)
 
     //check data is exist
     if (!!data) {
@@ -62,7 +62,7 @@ const restService = {
         }
 
         // set redis
-        await setData(`${ERedisKey.AllRestaurants}:${page}`, res)
+        await redisUtil.setData(`${ERedisKey.AllRestaurants}:${page}`, res)
 
         return callback(res)
       })
