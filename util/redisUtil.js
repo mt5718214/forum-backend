@@ -1,6 +1,10 @@
 const { createClient } = require('redis');
 
 const REDIS_URL = process.env.REDIS_URL || 'redis://localhost:6379'
+// REDIS 預設過期時間 30s
+const DEFAULT_EXPIRE_TIME = 30;
+// REDIS 最長過期時間 1天
+const MAX_EXPIRE_TIME = 60 * 60 * 24;
 
 /**
  * 寫入
@@ -8,7 +12,7 @@ const REDIS_URL = process.env.REDIS_URL || 'redis://localhost:6379'
  * @param {any} value 
  * @returns 
  */
-const setData = async (key, value) => {
+const setData = async (key, value, expireSecond = DEFAULT_EXPIRE_TIME) => {
   const client = createClient({
     url: REDIS_URL
   })
@@ -16,7 +20,12 @@ const setData = async (key, value) => {
   client.on('error', (err) => console.log('Redis Client Error', err))
 
   await client.connect()
-  await client.set(key, JSON.stringify(value))
+  await client.set(key, JSON.stringify(value), {
+    EX:
+      expireSecond > 0
+        ? expireSecond > MAX_EXPIRE_TIME ? MAX_EXPIRE_TIME : expireSecond
+        : expireSecond
+  })
   await client.quit()
   return true
 }
