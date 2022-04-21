@@ -1,5 +1,4 @@
 const express = require('express')
-const handlebars = require('express-handlebars')
 const bodyParser = require('body-parser')
 const methodOverride = require('method-override')
 const flash = require('connect-flash')
@@ -27,13 +26,6 @@ const io = require('socket.io')(http, {
     credentials: true
   }
 })
-
-// 設定 view engine 使用 handlebars
-app.engine('handlebars', handlebars({
-  defaultLayout: 'main',
-  helpers: require('./config/handlebars-helpers')
-}))
-app.set('view engine', 'handlebars')
 
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(bodyParser.json())
@@ -63,9 +55,6 @@ const swaggerUi = require('swagger-ui-express')
 const swaggerDocument = require('./config/swagger.json')
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument))
-
-// const expressOasGenerator = require('express-oas-generator');
-// expressOasGenerator.init(app, {});
 
 // 引入 routes 並將 app 傳進去，讓 routes 可以用 app 這個物件來指定路由
 require('./routes')(app)
