@@ -81,8 +81,8 @@ const restService = {
         include: [User, Restaurant]
       }).then(comments => {
         callback({
-          restaurants: restaurants,
-          comments: comments
+          restaurants,
+          comments
         })
       })
     })
@@ -106,9 +106,9 @@ const restService = {
       restaurants = restaurants.map(d => (
         {
           ...d.dataValues,
-          description: d.description.substring(0, 50),
-          isFavorited: req.user.FavoritedRestaurants.map(d => d.id).includes(d.id),
-          FavoriteCount: d.FavoritedUsers.length
+          description: d.dataValues.description ? d.dataValues.description.substring(0, 50) : '',
+          isFavorited: req.user.FavoritedRestaurants ? req.user.FavoritedRestaurants.map(d => d.id).includes(d.id) : false,
+          FavoriteCount: d.dataValues.FavoritedUsers.length
         }
       ))
       restaurants = restaurants.sort((a, b) => a.FavoriteCount < b.FavoriteCount ? 1 : -1).slice(0, 10)

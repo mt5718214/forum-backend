@@ -8,6 +8,7 @@ const app = require('../app')
 const db = require('../models')
 const Category = db.Category
 const Restaurant = db.Restaurant
+const Comment = db.Comment
 const passport = require('../config/passport')
 
 describe('# user request', () => {
@@ -40,7 +41,6 @@ describe('# user request', () => {
           .expect(200)
           .end((err, res) => {
             if (err) return done(err)
-            console.log(res.text)
             expect(res.text).to.include('Restaurant')
             return done()
           })
@@ -58,8 +58,106 @@ describe('# user request', () => {
       })
     })
 
-    // describe('GET /api/restaurants/feeds', () => {
+    describe('GET /api/restaurants/feeds', () => {
+      before(async () => {
+        const rootUser = { name: 'root' }
+        this.authenticate = sinon.stub(passport, "authenticate").callsFake((strategy, options, callback) => {
+          callback(null, { ...rootUser }, null)
+          return (req, res, next) => { }
+        })
+        this.Restaurant = sinon.stub(Restaurant, 'findAll').resolves([
+          { "id": 1, "name": "Restaurant", "tel": "(304) 806-3705 x90615", "address": "110 Gislason Parkways" }
+        ])
+        this.Comment = sinon.stub(Comment, 'findAll').resolves([
+          { "id": 1, "text": "testText", "UserId": 1, "RestaurantId": 1 }
+        ])
+      })
 
+      it(' - successfully', (done) => {
+        request(app)
+          .get('/api/restaurants/feeds')
+          .set('Accept', 'application/json')
+          .expect(200)
+          .end((err, res) => {
+            if (err) return done(err)
+            expect(res.text).to.include('Restaurant')
+            expect(res.text).to.include('testText')
+            return done()
+          })
+      })
+
+      after(async () => {
+        this.authenticate.restore()
+        this.Restaurant.restore()
+        this.Comment.restore()
+      })
+    })
+
+    describe('GET /restaurants/top', () => {
+      before(async () => {
+        const rootUser = { name: 'root' }
+        this.authenticate = sinon.stub(passport, "authenticate").callsFake((strategy, options, callback) => {
+          callback(null, { ...rootUser }, null)
+          return (req, res, next) => { }
+        })
+        this.Restaurant = sinon.stub(Restaurant, 'findAll').resolves([
+          { dataValues: { "id": 1, "name": "Restaurant", "tel": "(304) 806-3705 x90615", "address": "110 Gislason Parkways", "FavoritedUsers": [] } },
+          { dataValues: { "id": 2, "name": "Restaurant2", "tel": "(304) 806-3705 x90615", "address": "110 Gislason Parkways", "FavoritedUsers": [] } }
+        ])
+      })
+
+      it(' - successfully', (done) => {
+        request(app)
+          .get('/api/restaurants/top')
+          .set('Accept', 'application/json')
+          .expect(200)
+          .end((err, res) => {
+            if (err) return done(err)
+            expect(res.body).to.be.an('object')
+            expect(res.body.restaurants).to.be.an('array')
+            expect(res.text).to.include('Restaurant2')
+            return done()
+          })
+      })
+
+      after(async () => {
+        this.authenticate.restore()
+        this.Restaurant.restore()
+      })
+    })
+
+    // describe('GET /restaurants/:id', () => {
+    //   before(async () => {
+    //     const rootUser = { name: 'root' }
+    //     this.authenticate = sinon.stub(passport, "authenticate").callsFake((strategy, options, callback) => {
+    //       callback(null, { ...rootUser }, null)
+    //       return (req, res, next) => { }
+    //     })
+    //     this.Restaurant = sinon.stub(Restaurant, 'findByPk').resolves({
+    //       name: 'Restaurant', createdAt: new Date(), updatedAt: new Date(), CategoryId: 1, FavoritedUsers: [], LikedUsers: []
+    //     })
+    //     // save() 待解決
+    //     this.Restaurant = sinon.stub(Restaurant, 'save').resolves({
+    //       name: 'Restaurant', createdAt: new Date(), updatedAt: new Date(), CategoryId: 1, FavoritedUsers: [], LikedUsers: []
+    //     })
+    //   })
+
+    //   it(' - successfully', (done) => {
+    //     request(app)
+    //       .get('/api/restaurants/1')
+    //       .set('Accept', 'application/json')
+    //       .expect(200)
+    //       .end((err, res) => {
+    //         if (err) return done(err)
+    //         expect(res.text).to.include('Restaurant')
+    //         return done()
+    //       })
+    //   })
+
+    //   after(async () => {
+    //     this.authenticate.restore()
+    //     this.Restaurant.restore()
+    //   })
     // })
 
   })
