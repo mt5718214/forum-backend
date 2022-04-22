@@ -10,6 +10,7 @@ const Category = db.Category
 const Restaurant = db.Restaurant
 const Comment = db.Comment
 const passport = require('../config/passport')
+const redisUtil = require('../util/redisUtil')
 
 describe('# user request', () => {
 
@@ -32,6 +33,8 @@ describe('# user request', () => {
           rows: [{ dataValues: { name: 'Restaurant', createdAt: new Date(), updatedAt: new Date(), CategoryId: 1 } }]
         })
         this.Category = sinon.stub(Category, 'findAll').resolves([1, 2, 3, 4, 5, 6, 7])
+        this.getData = sinon.stub(redisUtil, 'getData').resolves(null)
+        this.setData = sinon.stub(redisUtil, 'setData').resolves(true)
       })
 
       it(' - successfully', (done) => {
@@ -41,6 +44,28 @@ describe('# user request', () => {
           .expect(200)
           .end((err, res) => {
             if (err) return done(err)
+            sinon.assert.calledOnce(this.setData)
+            sinon.assert.calledOnce(this.getData)
+            expect(res.text).to.include('Restaurant')
+            return done()
+          })
+      })
+
+      it('shoule get data from redis', (done) => {
+        this.getData.restore()
+        /**
+         * 這裡可能因為從新stub getData導致次數從新計算 this.getData callCount才會只有一次
+         * 因為this.setData在這的callCount為一次, 即使已經restore()了
+         *  */
+        this.getData = sinon.stub(redisUtil, 'getData').resolves({ name: 'Restaurant', createdAt: new Date(), updatedAt: new Date(), CategoryId: 1 })
+
+        request(app)
+          .get('/api/restaurants')
+          .set('Accept', 'application/json')
+          .expect(200)
+          .end((err, res) => {
+            if (err) return done(err)
+            sinon.assert.calledOnce(this.getData)
             expect(res.text).to.include('Restaurant')
             return done()
           })
@@ -55,6 +80,8 @@ describe('# user request', () => {
         this.authenticate.restore()
         this.Restaurant.restore()
         this.Category.restore()
+        this.getData.restore()
+        this.setData.restore()
       })
     })
 
