@@ -110,7 +110,8 @@ let userController = {
       name: req.user.name,
       email: req.user.email,
       image: req.user.image,
-      isAdmin: req.user.isAdmin
+      isAdmin: req.user.isAdmin,
+      mailNotification: req.user.enableMailNotification,
     })
   }
 }

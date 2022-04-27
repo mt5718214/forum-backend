@@ -5,7 +5,8 @@ module.exports = (sequelize, DataTypes) => {
     email: DataTypes.STRING,
     password: DataTypes.STRING,
     isAdmin: DataTypes.BOOLEAN,
-    image: DataTypes.STRING
+    image: DataTypes.STRING,
+    enableMailNotification: DataTypes.BOOLEAN
   }, {})
   User.associate = function (models) {
     User.hasMany(models.Comment)

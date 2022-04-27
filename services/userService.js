@@ -50,10 +50,13 @@ const userService = {
           })
       })
     } else {
+      const { name, mailNotification } = req.body
       return User.findByPk(req.params.id)
         .then((user) => {
           user.update({
-            name: req.body.name
+            name,
+            // mailNotification只有 'on' 或 undefined
+            enableMailNotification: !!mailNotification
           }).then((user) => {
             return callback({ status: 'success', message: 'updated successfully' })
           })
