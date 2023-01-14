@@ -3,15 +3,14 @@ const Restaurant = db.Restaurant
 const Category = db.Category
 const Comment = db.Comment
 const User = db.User
-const Favorite = db.Favorite
 
 const pageLimit = 10
 
-const restService = {
-  getRestaurants: (req, res, callback) => {
+export const restService = {
+  getRestaurants: (req, _res, callback) => {
     let offset = 0
     let whereQuery = {}
-    let categoryId = ''
+    let categoryId: number
     if (req.query.page) {
       offset = (req.query.page - 1) * pageLimit
     }
@@ -23,7 +22,7 @@ const restService = {
       // data for pagination
       let page = Number(req.query.page) || 1
       let pages = Math.ceil(result.count / pageLimit)
-      let totalPage = Array.from({ length: pages }).map((item, index) => index + 1)
+      let totalPage = Array.from({ length: pages }).map((_item, index) => index + 1)
       let prev = page - 1 < 1 ? 1 : page - 1
       let next = page + 1 > pages ? pages : page + 1
 
@@ -31,23 +30,23 @@ const restService = {
       const data = result.rows.map(r => ({
         ...r.dataValues,
         description: r.dataValues.description ? r.dataValues.description.substring(0, 50) : '',
-        isFavorited: req.user.FavoritedRestaurants ? req.user.FavoritedRestaurants.map(d => d.id).includes(r.id) : false,
-        isLiked: req.user.LikedRestaurants ? req.user.LikedRestaurants.map(d => d.id).includes(r.id) : false
+        isFavorited: req.user?.FavoritedRestaurants ? req.user.FavoritedRestaurants.map(d => d.id).includes(r.id) : false,
+        isLiked: req.user?.LikedRestaurants ? req.user.LikedRestaurants.map(d => d.id).includes(r.id) : false
       }))
       Category.findAll().then(categories => {
         return callback({
           restaurants: data,
-          categories: categories,
-          categoryId: categoryId,
-          page: page,
-          totalPage: totalPage,
-          prev: prev,
-          next: next
+          categories,
+          categoryId,
+          page,
+          totalPage,
+          prev,
+          next
         })
       })
     })
   },
-  getRestaurant: (req, res, callback) => {
+  getRestaurant: (req, _res, callback) => {
     return Restaurant.findByPk(req.params.id, {
       include: [
         Category,
@@ -62,14 +61,14 @@ const restService = {
           const isFavorited = restaurant.FavoritedUsers.map(d => d.id).includes(req.user.id)
           const isLiked = restaurant.LikedUsers.map(d => d.id).includes(req.user.id)
           callback({
-            restaurant: restaurant,
-            isFavorited: isFavorited,
-            isLiked: isLiked
+            restaurant,
+            isFavorited,
+            isLiked
           })
         })
     })
   },
-  getFeeds: (req, res, callback) => {
+  getFeeds: (_req, _res, callback) => {
     return Restaurant.findAll({
       limit: 10,
       order: [['createdAt', 'DESC']],
@@ -87,17 +86,17 @@ const restService = {
       })
     })
   },
-  getDashboard: (req, res, callback) => {
+  getDashboard: (req, _res, callback) => {
     return Restaurant.findByPk(req.params.id, {
       include: [
         Category,
         { model: Comment, include: [User] }
       ]
     }).then(restaurant => {
-      return callback({ restaurant: restaurant })
+      return callback({ restaurant })
     })
   },
-  getTopRestaurants: (req, res, callback) => {
+  getTopRestaurants: (req, _res, callback) => {
     return Restaurant.findAll({
       include: [
         { model: User, as: 'FavoritedUsers' }
@@ -107,18 +106,16 @@ const restService = {
         {
           ...d.dataValues,
           description: d.dataValues.description ? d.dataValues.description.substring(0, 50) : '',
-          isFavorited: req.user.FavoritedRestaurants ? req.user.FavoritedRestaurants.map(d => d.id).includes(d.id) : false,
+          isFavorited: req.user?.FavoritedRestaurants ? req.user.FavoritedRestaurants.map(d => d.id).includes(d.id) : false,
           FavoriteCount: d.dataValues.FavoritedUsers.length
         }
       ))
       restaurants = restaurants.sort((a, b) => a.FavoriteCount < b.FavoriteCount ? 1 : -1).slice(0, 10)
 
       return callback({
-        restaurants: restaurants,
+        restaurants,
         isAuthenticated: req.isAuthenticated
       })
     })
   }
 }
-
-module.exports = restService

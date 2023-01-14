@@ -7,20 +7,20 @@ const Category = db.Category
 const Comment = db.Comment
 const User = db.User
 
-const adminService = {
-  getRestaurants: (req, res, callback) => {
+export const adminService = {
+  getRestaurants: (_req, _res, callback) => {
     return Restaurant.findAll({ include: [Category] }).then(restaurants => {
       callback({ restaurants: restaurants })
     })
   },
-  postRestaurant: (req, res, callback) => {
+  postRestaurant: (req, _res, callback) => {
     if (!req.body.name) {
       return callback({ status: 'error', message: "name didn't exist" })
     }
     const { file } = req // equal to const file = req.file
     if (file) {
       imgur.setClientID(IMGUR_CLIENT_ID)
-      imgur.upload(file.path, (err, img) => {
+      imgur.upload(file.path, (_err, img) => {
         return Restaurant.create({
           name: req.body.name,
           tel: req.body.tel,
@@ -29,7 +29,7 @@ const adminService = {
           description: req.body.description,
           image: file ? img.data.link : null,
           CategoryId: req.body.categoryId
-        }).then((restaurant) => {
+        }).then(() => {
           callback({ status: 'success', message: 'restaurant was successfully created' })
         })
       })
@@ -51,12 +51,12 @@ const adminService = {
         })
     }
   },
-  getRestaurant: (req, res, callback) => {
+  getRestaurant: (req, _res, callback) => {
     return Restaurant.findByPk(req.params.id, { include: [Category] }).then(restaurant => {
       callback({ restaurant: restaurant })
     })
   },
-  putRestaurant: (req, res, callback) => {
+  putRestaurant: (req, _res, callback) => {
     if (!req.body.name) {
       return callback({ status: 'error', message: "name didn't exist" })
     }
@@ -64,7 +64,7 @@ const adminService = {
     const { file } = req
     if (file) {
       imgur.setClientID(IMGUR_CLIENT_ID)
-      imgur.upload(file.path, (err, img) => {
+      imgur.upload(file.path, (_err, img) => {
         return Restaurant.findByPk(req.params.id)
           .then((restaurant) => {
             restaurant.update({
@@ -75,7 +75,7 @@ const adminService = {
               description: req.body.description,
               image: file ? img.data.link : restaurant.image,
               CategoryId: req.body.categoryId
-            }).then((restaurant) => {
+            }).then(() => {
               callback({ status: 'success', message: 'restaurant was successfully to update' })
             })
           })
@@ -91,42 +91,40 @@ const adminService = {
             description: req.body.description,
             image: restaurant.image,
             CategoryId: req.body.categoryId
-          }).then((restaurant) => {
+          }).then(() => {
             callback({ status: 'success', message: 'restaurant was successfully to update' })
           })
         })
     }
   },
-  deleteRestaurant: (req, res, callback) => {
+  deleteRestaurant: (req, _res, callback) => {
     return Restaurant.findByPk(req.params.id, {
       include: [
         { model: Comment, include: [User] }
       ]
     })
       .then((restaurant) => {
-        console.log('restaurant.Comments', restaurant.Comments)
         restaurant.Comments.map(comment => {
-          console.log('comment.id', comment.id)
           comment.destroy()
         })
         restaurant.destroy()
-          .then((restaurant) => {
+          .then(() => {
             callback({ status: 'success', message: '' })
           })
       })
   },
-  getUsers: (req, res, callback) => {
+  getUsers: (_req, _res, callback) => {
     return User.findAll().then(users => {
       callback({ users: users })
     })
   },
-  putUsers: (req, res, callback) => {
+  putUsers: (req, _res, callback) => {
     return User.findByPk(req.params.id)
       .then((user) => {
         user.update({
           isAdmin: !req.body.isAdmin
         })
-          .then((restaurant) => {
+          .then(() => {
             callback({
               status: 'success',
               message: 'user was successfully to update'
@@ -135,5 +133,3 @@ const adminService = {
       })
   }
 }
-
-module.exports = adminService

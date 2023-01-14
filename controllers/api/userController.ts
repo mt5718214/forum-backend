@@ -1,15 +1,12 @@
 const bcrypt = require('bcryptjs')
 const db = require('../../models')
 const User = db.User
-const userService = require('../../services/userService.js')
+import { userService } from '../../services/userService'
 
 // JWT
 const jwt = require('jsonwebtoken')
-const passportJWT = require('passport-jwt')
-const ExtractJwt = passportJWT.ExtractJwt
-const JwtStrategy = passportJWT.Strategy
 
-let userController = {
+export const userController = {
   signIn: (req, res) => {
     // 檢查必要資料
     if (!req.body.email || !req.body.password) {
@@ -50,7 +47,7 @@ let userController = {
             name: req.body.name,
             email: req.body.email,
             password: bcrypt.hashSync(req.body.password, bcrypt.genSaltSync(10), null)
-          }).then(user => {
+          }).then(_user => {
             return res.json({ status: 'success', message: '成功註冊帳號！' })
           })
         }
@@ -114,5 +111,3 @@ let userController = {
     })
   }
 }
-
-module.exports = userController
