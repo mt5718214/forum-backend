@@ -43,4 +43,4 @@ ws(io)
 // 引入 routes 並將 app 傳進去，讓 routes 可以用 app 這個物件來指定路由
 require('./routes')(app)
 
-module.exports = app
+export default app
