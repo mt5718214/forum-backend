@@ -1,22 +1,37 @@
-const express = require('express')
-const router = express.Router()
+import express, { Request, Response, Router, NextFunction } from 'express'
+
+const router: Router = express.Router()
 const passport = require('../config/passport')
 
 const multer = require('multer')
 const upload = multer({ dest: 'temp/' })
 
-const restController = require('../controllers/api/restController.js')
-const userController = require('../controllers/api/userController.js')
-const adminController = require('../controllers/api/adminController.js')
-const categoryController = require('../controllers/api/categoryController.js')
-const commentController = require('../controllers/api/commentController.js')
+import { restController } from '../controllers/api/restController'
+import { userController } from '../controllers/api/userController'
+import { adminController } from '../controllers/api/adminController'
+import { categoryController } from '../controllers/api/categoryController'
+import { commentController } from '../controllers/api/commentController'
+
+interface authenticatedReq extends Request {
+  user: {
+    name: string,
+    email: string,
+    password: string,
+    isAdmin: boolean,
+    image: string
+  }
+}
+
+interface middleware {
+  (req: authenticatedReq, res: Response, next: NextFunction): express.Response<any, Record<string, any>> | void
+}
 
 /**
  * https://github.com/jaredhanson/passport/blob/master/lib/authenticator.js line 141 to line 144
  * 可以把req, res, next傳入callback
  */
-const authenticated = (req, res, next) => {
-  passport.authenticate('jwt', { session: false }, (err, user, info) => {
+const authenticated: middleware = (req, res, next) => {
+  passport.authenticate('jwt', { session: false }, (err, user, _info) => {
     if (err) {
       console.log(err)
     }
@@ -29,7 +44,7 @@ const authenticated = (req, res, next) => {
     return next()
   })(req, res, next)
 }
-const authenticatedAdmin = (req, res, next) => {
+const authenticatedAdmin: middleware = (req, res, next) => {
   if (req.user) {
     if (req.user.isAdmin) { return next() }
     return res.json({ status: 'error', message: 'permission denied' })
@@ -40,7 +55,7 @@ const authenticatedAdmin = (req, res, next) => {
 
 router.get('/get_current_user', authenticated, userController.getCurrentUser)
 
-router.get('/', authenticated, (req, res) => res.redirect('/api/restaurants'))
+router.get('/', authenticated, (_req, res) => res.redirect('/api/restaurants'))
 router.get('/restaurants', authenticated, restController.getRestaurants)
 router.get('/restaurants/feeds', authenticated, restController.getFeeds)
 router.get('/restaurants/top', authenticated, restController.getTopRestaurants)
@@ -60,7 +75,7 @@ router.delete('/like/:restaurantId', authenticated, userController.removeLike)
 router.post('/following/:userId', authenticated, userController.addFollowing)
 router.delete('/following/:userId', authenticated, userController.removeFollowing)
 
-router.get('/admin', authenticated, authenticatedAdmin, (req, res) => res.redirect('/api/admin/restaurants'))
+router.get('/admin', authenticated, authenticatedAdmin, (_req, res) => res.redirect('/api/admin/restaurants'))
 router.get('/admin/restaurants', authenticated, authenticatedAdmin, adminController.getRestaurants)
 router.get('/admin/restaurants/:id', authenticated, authenticatedAdmin, adminController.getRestaurant)
 router.post('/admin/restaurants', authenticated, authenticatedAdmin, upload.single('image'), adminController.postRestaurant)
@@ -79,4 +94,4 @@ router.delete('/admin/categories/:id', authenticated, authenticatedAdmin, catego
 router.post('/signin', userController.signIn)
 router.post('/signup', userController.signUp)
 
-module.exports = router
+export default router

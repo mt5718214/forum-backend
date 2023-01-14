@@ -1,6 +1,6 @@
-const restService = require('../../services/restService.js')
+import { restService } from '../../services/restService'
 
-const restController = {
+export const restController = {
   getRestaurants: (req, res) => {
     restService.getRestaurants(req, res, (data) => {
       return res.json(data)
@@ -27,5 +27,3 @@ const restController = {
     })
   }
 }
-
-module.exports = restController

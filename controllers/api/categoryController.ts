@@ -1,28 +1,26 @@
-const db = require('../../models')
-const Category = db.Category
+import { Request, Response } from "express"
 
-const categoryService = require('../../services/categoryService.js')
+import { categoryService } from '../../services/categoryService'
 
-let categoryController = {
-  getCategories: (req, res) => {
+export const categoryController = {
+  getCategories: (req: Request, res: Response) => {
     categoryService.getCategories(req, res, (data) => {
       return res.json(data)
     })
   },
-  postCategory: (req, res) => {
+  postCategory: (req: Request, res: Response) => {
     categoryService.postCategory(req, res, (data) => {
       return res.json(data)
     })
   },
-  putCategory: (req, res) => {
+  putCategory: (req: Request, res: Response) => {
     categoryService.putCategory(req, res, (data) => {
       return res.json(data)
     })
   },
-  deleteCategory: (req, res) => {
+  deleteCategory: (req: Request, res: Response) => {
     categoryService.deleteCategory(req, res, (data) => {
       return res.json(data)
     })
   }
 }
-module.exports = categoryController

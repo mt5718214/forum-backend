@@ -1,10 +1,6 @@
-const db = require('../../models')
-const Restaurant = db.Restaurant
-const Category = db.Category
+import { adminService } from '../../services/adminService'
 
-const adminService = require('../../services/adminService.js')
-
-const adminController = {
+export const adminController = {
   getRestaurants: (req, res) => {
     adminService.getRestaurants(req, res, (data) => {
       return res.json(data)
@@ -41,4 +37,3 @@ const adminController = {
     })
   }
 }
-module.exports = adminController

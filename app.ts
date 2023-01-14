@@ -51,11 +51,6 @@ http.listen(port, () => {
 // websocket
 require('./controllers/ws/chat')(io)
 
-const swaggerUi = require('swagger-ui-express')
-const swaggerDocument = require('./config/swagger.json')
-
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument))
-
 // 引入 routes 並將 app 傳進去，讓 routes 可以用 app 這個物件來指定路由
 require('./routes')(app)
 
