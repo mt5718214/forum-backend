@@ -1,9 +1,9 @@
-const express = require('express')
+import express from 'express'
 const router = express.Router()
 
-router.get('/', (req, res, next) => {
+router.get('/', (_req, res, _next) => {
   console.log("it's chat now")
   return res.send(new Date())
 })
 
-module.exports = router
+export default router

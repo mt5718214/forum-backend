@@ -2,7 +2,7 @@ const { format } = require('fecha')
 const db = require('../models')
 const { QueryTypes } = require('sequelize');
 
-const chatService = {
+export const ChatService = {
   async getMessage(data) {
     const { namespace } = data
     const messages = await db.sequelize.query(
@@ -42,5 +42,3 @@ const chatService = {
     )
   }
 }
-
-module.exports = chatService
