@@ -1,12 +1,15 @@
-const passport = require('passport')
-const LocalStrategy = require('passport-local')
-const bcrypt = require('bcryptjs')
+import passport from 'passport'
+import LocalStrategy from 'passport-local' 
+import bcrypt from 'bcryptjs'
 const db = require('../models')
 const User = db.User
-const Restaurant = db.Restaurant
+
+interface serializeUser extends Express.User {
+  id: number
+}
 
 // setup passport strategy
-passport.use(new LocalStrategy(
+passport.use(new LocalStrategy.Strategy(
   // customize user field
   {
     usernameField: 'email',
@@ -14,7 +17,9 @@ passport.use(new LocalStrategy(
     passReqToCallback: true
   },
   // authenticate user
-  (req, username, password, cb) => {
+  (req: any, username: string, password: string, cb) => {
+    console.log("LocalStrategy");
+    
     User.findOne({ where: { email: username } }).then(user => {
       if (!user) return cb(null, false, req.flash('error_messages', '帳號或密碼輸入錯誤'))
       if (!bcrypt.compareSync(password, user.password)) return cb(null, false, req.flash('error_messages', '帳號或密碼輸入錯誤！'))
@@ -24,7 +29,7 @@ passport.use(new LocalStrategy(
 ))
 
 // serialize and deserialize user
-passport.serializeUser((user, cb) => {
+passport.serializeUser((user: serializeUser, cb) => {
   cb(null, user.id)
 })
 passport.deserializeUser((id, cb) => {
@@ -41,16 +46,25 @@ passport.deserializeUser((id, cb) => {
 })
 
 // JWT
-const jwt = require('jsonwebtoken')
-const passportJWT = require('passport-jwt')
+import passportJWT, { JwtFromRequestFunction } from 'passport-jwt'
 const ExtractJwt = passportJWT.ExtractJwt
 const JwtStrategy = passportJWT.Strategy
 
-let jwtOptions = {}
+interface jwtOptions {
+  jwtFromRequest: JwtFromRequestFunction
+  secretOrKey: string | undefined
+}
+
+let jwtOptions: jwtOptions = {
+  jwtFromRequest: function () {
+    throw new Error('Function not implemented.')
+  },
+  secretOrKey: undefined
+}
 jwtOptions.jwtFromRequest = ExtractJwt.fromAuthHeaderAsBearerToken()
 jwtOptions.secretOrKey = process.env.JWT_SECRET
 
-let strategy = new JwtStrategy(jwtOptions, function (jwt_payload, next) {
+passport.use(new JwtStrategy(jwtOptions, function (jwt_payload, next) {
   User.findByPk(jwt_payload.id, {
     include: [
       { model: db.Restaurant, as: 'FavoritedRestaurants' },
@@ -62,7 +76,6 @@ let strategy = new JwtStrategy(jwtOptions, function (jwt_payload, next) {
     if (!user) return next(null, false)
     return next(null, user)
   })
-})
-passport.use(strategy)
+}))
 
-module.exports = passport
+export default passport
