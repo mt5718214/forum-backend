@@ -1,22 +1,24 @@
-const chai = require('chai')
-const should = chai.should()
-const request = require('supertest')
-const bcrypt = require('bcryptjs')
-const sinon = require('sinon')
+import request from 'supertest'
+import bcrypt from 'bcryptjs'
+import sinon from 'sinon'
+import { should } from 'chai'
+should()
 
-const app = require('../app')
+import app from '../app'
+
 const db = require('../models')
 const User = db.User
 
 describe('# login request', () => {
+  let create, findOne
   before(async () => {
     const user = {
       name: 'test1',
       email: 'test1',
       password: bcrypt.hashSync('test1', bcrypt.genSaltSync(10)),
     }
-    this.create = sinon.stub(User, 'create').returns(user)
-    this.findOne = sinon.stub(User, 'findOne').resolves({ ...user })
+    create = sinon.stub(User, 'create').returns(user)
+    findOne = sinon.stub(User, 'findOne').resolves({ ...user })
   })
 
   it('login fail', (done) => {
@@ -49,7 +51,7 @@ describe('# login request', () => {
   })
 
   after(async () => {
-    this.create.restore()
-    this.findOne.restore()
+    create.restore()
+    findOne.restore()
   })
 })
