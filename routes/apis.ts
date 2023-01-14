@@ -1,10 +1,5 @@
 import express, { Request, Response, Router, NextFunction } from 'express'
-
-const router: Router = express.Router()
-const passport = require('../config/passport')
-
-const multer = require('multer')
-const upload = multer({ dest: 'temp/' })
+import passport from 'passport'
 
 import { restController } from '../controllers/api/restController'
 import { userController } from '../controllers/api/userController'
@@ -12,8 +7,14 @@ import { adminController } from '../controllers/api/adminController'
 import { categoryController } from '../controllers/api/categoryController'
 import { commentController } from '../controllers/api/commentController'
 
+const multer = require('multer')
+const upload = multer({ dest: 'temp/' })
+
+const router: Router = express.Router()
+
 interface authenticatedReq extends Request {
   user: {
+    id: number
     name: string,
     email: string,
     password: string,
