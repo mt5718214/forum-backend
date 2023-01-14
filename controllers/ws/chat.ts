@@ -1,8 +1,8 @@
-const ChatService = require('../../services/chatService')
+import { ChatService } from '../../services/chatService'
 
 const onlineUsers = new Map()
 
-module.exports = (io) => {
+export const ws = (io) => {
   /*監聽 連線狀態*/
   io.on('connection', async function (socket) {
     console.log('user connected...')
