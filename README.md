@@ -45,3 +45,84 @@ npm run dev
 |  account   | password  |
 |  ----  | ----  |
 | root@example.com  | 12345678 |
+
+
+## Auto Start or Stop EC2 by Lambda and CloudWatch
+
+**Create Lambda and create role**
+![](doc/lambda/create-lambda-role.png)
+
+**Grant role permission to modify EC2 & write log**
+```
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "logs:CreateLogGroup",
+        "logs:CreateLogStream",
+        "logs:PutLogEvents"
+      ],
+      "Resource": "arn:aws:logs:*:*:*"
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "ec2:Start*",
+        "ec2:Stop*"
+      ],
+      "Resource": "*"
+    }
+  ]
+}
+```
+
+**Using *@aws-sdk/client-ec2* module to start or stop EC2**
+```javascript
+// https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/clients/client-ec2/index.html
+
+import { EC2 } from '@aws-sdk/client-ec2';
+const client = new EC2({ region: "your region" });
+
+const params = {
+  InstanceIds: [
+     "your ec2 instanceID"
+  ]
+ }
+
+export const handler = async (event) => {
+   try {
+      /** 
+       * you need to create two lambda, one for start and the other for stop
+      */
+
+      // stop instances
+      const res = await client.stopInstances(params)
+      console.log(res)
+
+      // start instances
+      const res = await client.startInstances(params)
+      console.log(res)
+
+      const response = {
+          statusCode: 200,
+          body: JSON.stringify(data),
+      };
+      
+      return response;
+    } catch (error) {
+      const response = {
+          statusCode: 400,
+          body: JSON.stringify(error),
+      };
+      return response;
+    }
+};
+```
+
+**Using CloudWatch to trigger lambda**
+![](doc/lambda/setupCloudWatchRule.png)
+
+* for **Event Source** I wanna EC2 to start at 10:00(UTC+8) MON-FRI.
+* for **Targets** choose the lambda you create before.

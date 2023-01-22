@@ -3,5 +3,6 @@ temp/
 upload/
 lib/
 
+.vscode/
 .DS_Store
 .env
